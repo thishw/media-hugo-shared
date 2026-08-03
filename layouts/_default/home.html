@@ -6,12 +6,19 @@
 <ul class="post-list">
   {{ range $paginator.Pages }}
   {{ $permalink := .Permalink }}
-  <li class="post-item">
+  {{- /* 목록 썸네일: 글 자체 og_image 가 있을 때만. 없으면 클래스도 마크업도
+         안 붙어 기존 텍스트 온리 렌더 그대로다(insight 무회귀). 썸네일은 제목
+         링크의 중복이라 스크린리더/탭 순서에서 제외한다. */ -}}
+  {{ $thumb := .Params.og_image }}
+  <li class="post-item{{ if $thumb }} has-thumb{{ end }}">
     <a class="post-link" href="{{ $permalink }}">
       <span class="post-title">{{ .Title }}</span>
       <time class="post-date" datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format (site.Params.date_format | default "2006년 1월 2일") }}</time>
     </a>
     {{ with .Description }}<p class="post-desc">{{ . }} <a class="post-more" href="{{ $permalink }}">{{ site.Params.label_read_more | default "더 읽기 →" }}</a></p>{{ end }}
+    {{- with $thumb }}
+    <a class="post-thumb" href="{{ $permalink }}" tabindex="-1" aria-hidden="true"><img src="{{ . | absURL }}" alt="" width="320" height="180" loading="lazy" decoding="async"></a>
+    {{- end }}
   </li>
   {{ end }}
 </ul>

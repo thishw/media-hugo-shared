@@ -4,12 +4,17 @@
 <p class="term-back"><a href="{{ .Parent.Permalink }}">{{ site.Params.label_all_categories | default "← 모든 카테고리" }}</a></p>
 <ul class="post-list">
   {{ range .Pages }}
-  <li class="post-item">
-    <a class="post-link" href="{{ .Permalink }}">
+  {{- /* 썸네일 규약은 home.html 과 동일 — og_image 있을 때만 붙는다 */ -}}
+  {{ $permalink := .Permalink }}{{ $thumb := .Params.og_image }}
+  <li class="post-item{{ if $thumb }} has-thumb{{ end }}">
+    <a class="post-link" href="{{ $permalink }}">
       <span class="post-title">{{ .Title }}</span>
       <time class="post-date" datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format (site.Params.date_format | default "2006년 1월 2일") }}</time>
     </a>
     {{ with .Description }}<p class="post-desc">{{ . }}</p>{{ end }}
+    {{- with $thumb }}
+    <a class="post-thumb" href="{{ $permalink }}" tabindex="-1" aria-hidden="true"><img src="{{ . | absURL }}" alt="" width="320" height="180" loading="lazy" decoding="async"></a>
+    {{- end }}
   </li>
   {{ else }}
   <li>{{ site.Params.label_no_posts | default "이 카테고리에 글이 없습니다." }}</li>

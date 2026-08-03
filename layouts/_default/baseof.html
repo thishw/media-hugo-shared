@@ -26,7 +26,10 @@
   {{ partial "body/gtm-noscript.html" . }}
   <header>
     <nav class="site-nav">
-      {{ $logo := site.Params.logo }}<a class="site-title" href="{{ .Site.BaseURL }}">{{ if $logo }}<img class="site-logo" src="{{ $logo }}" alt="{{ .Site.Title }}">{{ else }}{{ .Site.Title }}{{ end }}</a>
+      {{- /* 다크 워드마크는 params.logo_dark 가 있을 때만 <picture> 로 분기한다 —
+             자산이 없는 매체는 라이트 로고 그대로(폴백). 다크 배경이 실존하게 된
+             뒤의 복원이라 2440b13(다크 배경 없이 스왑) 문제는 재발하지 않는다. */ -}}
+      {{ $logo := site.Params.logo }}{{ $logoDark := site.Params.logo_dark }}<a class="site-title" href="{{ .Site.BaseURL }}">{{ if $logo }}{{ if $logoDark }}<picture><source srcset="{{ $logoDark }}" media="(prefers-color-scheme: dark)"><img class="site-logo" src="{{ $logo }}" alt="{{ .Site.Title }}"></picture>{{ else }}<img class="site-logo" src="{{ $logo }}" alt="{{ .Site.Title }}">{{ end }}{{ else }}{{ .Site.Title }}{{ end }}</a>
       {{- with site.Menus.main }}
       <div class="nav-menu">
         {{ partial "menu.html" (dict "page" $ "menuEntries" .) }}
@@ -52,8 +55,14 @@
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.15.0/dist/mermaid.esm.min.mjs';
     // edgeLabelBackground: mermaid 기본값(연회색)은 흰 배경 위에서 라벨마다 회색
     // 섀딩으로 보인다. transparent는 금지 — 라벨이 선 위에 얹히면 선이 글자를
-    // 관통해 가독성이 깨진다. 흰 배경 사이트이므로 #ffffff = 시각적 투명 + 가독 유지.
-    mermaid.initialize({ startOnLoad: true, themeVariables: { edgeLabelBackground: "#ffffff" } });
+    // 관통해 가독성이 깨진다. 그래서 "페이지 배경색과 같은 불투명색"을 넣는다:
+    // 라이트 #ffffff / 다크 #121212(main.css --bg). 고정 흰색은 다크에서 깨진다.
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: prefersDark ? 'dark' : 'default',
+      themeVariables: { edgeLabelBackground: prefersDark ? "#121212" : "#ffffff" },
+    });
   </script>
   {{ end }}
   {{ with .Site.Params.gtm_id }}
