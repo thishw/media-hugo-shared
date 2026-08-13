@@ -10,7 +10,7 @@
   {{ $heroExcerpt := $hero.Description | default $hero.Summary | plainify }}
   <article class="magazine-hero">
     <a class="magazine-hero-link" href="{{ $hero.RelPermalink }}">
-      {{ with $hero.Params.og_image }}<img class="magazine-hero-image" src="{{ . | absURL }}" alt="" width="1200" height="675" decoding="async" fetchpriority="high">{{ end }}
+      {{ with $hero.Params.og_image }}<img class="magazine-hero-image" src="{{ . | absURL }}" srcset="{{ . | absURL }} 1200w" sizes="(max-width: 768px) 100vw, 800px" alt="" width="1200" height="675" decoding="async" fetchpriority="high">{{ end }}
       <span class="magazine-hero-body">
         {{ with $heroCategory }}<span class="magazine-category-label">{{ . }}</span>{{ end }}
         <span class="magazine-hero-title">{{ $hero.Title }}</span>
