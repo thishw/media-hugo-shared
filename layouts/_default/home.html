@@ -1,4 +1,73 @@
 {{ define "main" }}
+{{ if eq site.Params.home_layout "magazine" }}
+{{ $posts := where .Site.RegularPages "Section" "posts" }}
+{{ $paginator := .Paginate $posts }}
+{{ $gridPages := $paginator.Pages }}
+
+{{ if and (eq $paginator.PageNumber 1) (gt (len $paginator.Pages) 0) }}
+  {{ $hero := index $paginator.Pages 0 }}
+  {{ $heroCategory := "" }}{{ with $hero.GetTerms "categories" }}{{ $heroCategory = (index . 0).Title }}{{ end }}
+  {{ $heroExcerpt := $hero.Description | default $hero.Summary | plainify }}
+  <article class="magazine-hero">
+    <a class="magazine-hero-link" href="{{ $hero.RelPermalink }}">
+      {{ with $hero.Params.og_image }}<img class="magazine-hero-image" src="{{ . | absURL }}" alt="" width="1200" height="675" decoding="async" fetchpriority="high">{{ end }}
+      <span class="magazine-hero-body">
+        {{ with $heroCategory }}<span class="magazine-category-label">{{ . }}</span>{{ end }}
+        <span class="magazine-hero-title">{{ $hero.Title }}</span>
+        {{ with $heroExcerpt }}<span class="magazine-hero-excerpt">{{ . }}</span>{{ end }}
+        <time class="magazine-date" datetime="{{ $hero.Date.Format "2006-01-02" }}">{{ $hero.Date.Format (site.Params.date_format | default "2006년 1월 2일") }}</time>
+      </span>
+    </a>
+  </article>
+  {{ $gridPages = after 1 $gridPages }}
+{{ end }}
+
+{{ with $gridPages }}
+<div class="magazine-grid">
+  {{ range . }}
+  {{ $cardCategory := "" }}{{ with .GetTerms "categories" }}{{ $cardCategory = (index . 0).Title }}{{ end }}
+  <article class="magazine-card{{ if .Params.og_image }} has-image{{ end }}">
+    <a class="magazine-card-link" href="{{ .RelPermalink }}">
+      {{ with .Params.og_image }}<img class="magazine-card-image" src="{{ . | absURL }}" alt="" width="640" height="360" loading="lazy" decoding="async">{{ end }}
+      <span class="magazine-card-body">
+        {{ with $cardCategory }}<span class="magazine-category-label">{{ . }}</span>{{ end }}
+        <span class="magazine-card-title">{{ .Title }}</span>
+        <time class="magazine-date" datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format (site.Params.date_format | default "2006년 1월 2일") }}</time>
+      </span>
+    </a>
+  </article>
+  {{ end }}
+</div>
+{{ end }}
+
+{{ if eq $paginator.PageNumber 1 }}
+  {{ with .Site.Taxonomies.categories.ByCount }}
+  <div class="magazine-category-strip">
+    {{ range first 3 . }}
+      {{ $termPage := .Page }}
+      <section class="magazine-category-section">
+        <header class="magazine-category-header">
+          <h2>{{ $termPage.Title }}</h2>
+          <a href="{{ $termPage.RelPermalink }}">{{ site.Params.label_view_all | default "View all →" }}</a>
+        </header>
+        <div class="magazine-mini-grid">
+          {{ range first 4 $termPage.Pages.ByDate.Reverse }}
+          <article class="magazine-mini-card{{ if .Params.og_image }} has-image{{ end }}">
+            <a href="{{ .RelPermalink }}">
+              {{ with .Params.og_image }}<img src="{{ . | absURL }}" alt="" width="320" height="180" loading="lazy" decoding="async">{{ end }}
+              <span>{{ .Title }}</span>
+            </a>
+          </article>
+          {{ end }}
+        </div>
+      </section>
+    {{ end }}
+  </div>
+  {{ end }}
+{{ end }}
+
+{{ partial "pagination.html" (dict "paginator" $paginator) }}
+{{ else }}
 <h1>{{ .Title }}</h1>
 {{ .Content }}
 {{ $posts := where .Site.RegularPages "Section" "posts" }}
@@ -44,5 +113,6 @@
     <span class="pagination-next is-disabled">{{ site.Params.label_next | default "다음 →" }}</span>
   {{ end }}
 </nav>
+{{ end }}
 {{ end }}
 {{ end }}

@@ -21,6 +21,9 @@
   {{ $css := resources.Get "css/main.css" | resources.Minify }}
   <link rel="stylesheet" href="{{ $css.RelPermalink }}">
   {{- partial "head/accent-color.html" . }}
+  {{- if and .IsHome (eq site.Params.home_layout "magazine") }}
+  {{- partial "head/home-magazine-style.html" . }}
+  {{- end }}
 </head>
 <body>
   {{ partial "body/gtm-noscript.html" . }}
