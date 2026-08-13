@@ -5,6 +5,6 @@
 */ -}}
 {{- $thinTerm := and (eq .Kind "term") (lt (len .Pages) 5) -}}
 {{- $emptyHome := and (eq .Kind "home") (eq (len (where .Site.RegularPages "Section" "posts")) 0) -}}
-{{- $emptyTaxonomy := and (eq .Kind "taxonomy") (eq (len .Pages) 0) -}}
+{{- $emptyTaxonomy := and (eq site.Params.home_layout "magazine") (eq .Kind "taxonomy") (eq (len .Pages) 0) -}}
 {{- $optOut := eq (.Params.noindex | default false) true -}}
 {{- return (or $thinTerm $emptyHome $emptyTaxonomy $optOut) -}}
