@@ -1,9 +1,12 @@
+{{- /* F5: index.json은 absURL(항상 기본 언어) 대신 현재 언어 홈의 JSON 출력을 참조 —
+       nil 가드는 JSON 출력이 없는 매체에서의 안전장치 */ -}}
+{{- $indexURL := "" }}{{ with site.Home.OutputFormats.Get "json" }}{{ $indexURL = .Permalink }}{{ end }}
 <aside class="sidebar">
   <div class="sidebar-block sidebar-search">
     <label class="sidebar-heading" for="site-search">{{ site.Params.label_search | default "검색" }}</label>
     <input type="search" id="site-search" class="search-input" placeholder="{{ site.Params.label_search_placeholder | default "글 검색…" }}"
            autocomplete="off" data-search-input data-search-results="#search-results"
-           data-index-url="{{ "index.json" | absURL }}" data-limit="8" data-search-dismiss="true"
+           data-index-url="{{ $indexURL }}" data-limit="8" data-search-dismiss="true"
            data-empty-label="{{ site.Params.label_search_empty | default "결과 없음" }}">
     <ul class="search-results" id="search-results" hidden></ul>
   </div>
@@ -16,7 +19,7 @@
       {{ range . }}
       <li class="sidebar-item">
         <a href="{{ .RelPermalink }}" class="sidebar-link{{ if eq . $ }} active{{ end }}">{{ .Title }}</a>
-        <time class="sidebar-date">{{ .Date.Format "2006-01-02" }}</time>
+        <time class="sidebar-date" datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format (site.Params.date_format | default "2006-01-02") }}</time>
       </li>
       {{ end }}
     </ul>

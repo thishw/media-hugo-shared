@@ -1,11 +1,26 @@
 {{ define "main" }}
+{{- /* F12: 원시 <ul> 폴백을 term.html의 post-list 마크업(썸네일+설명)으로 교체하고
+       191항목 무페이지네이션 문제를 해소한다. */}}
 <h1>{{ .Title }}</h1>
-<ul>
-  {{ range .Pages }}
-  <li>
-    <a href="{{ .Permalink }}">{{ .Title }}</a>
-    <time>{{ .Date.Format "2006-01-02" }}</time>
+{{ with .Content }}<div class="term-intro">{{ . }}</div>{{ end }}
+{{ $paginator := .Paginate .Pages }}
+<ul class="post-list">
+  {{ range $paginator.Pages }}
+  {{- /* 썸네일 규약은 home.html/term.html 과 동일 — og_image 있을 때만 붙는다 */ -}}
+  {{ $permalink := .Permalink }}{{ $thumb := .Params.og_image }}
+  <li class="post-item{{ if $thumb }} has-thumb{{ end }}">
+    <a class="post-link" href="{{ $permalink }}">
+      <span class="post-title">{{ .Title }}</span>
+      <time class="post-date" datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format (site.Params.date_format | default "2006년 1월 2일") }}</time>
+    </a>
+    {{ with .Description }}<p class="post-desc">{{ . }}</p>{{ end }}
+    {{- with $thumb }}
+    <a class="post-thumb" href="{{ $permalink }}" tabindex="-1" aria-hidden="true"><img src="{{ . | absURL }}" alt="" width="320" height="180" loading="lazy" decoding="async"></a>
+    {{- end }}
   </li>
+  {{ else }}
+  <li>{{ site.Params.label_no_posts | default "이 카테고리에 글이 없습니다." }}</li>
   {{ end }}
 </ul>
+{{ partial "pagination.html" (dict "paginator" $paginator) }}
 {{ end }}

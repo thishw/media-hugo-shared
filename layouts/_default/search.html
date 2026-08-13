@@ -1,11 +1,12 @@
 {{ define "main" }}
 <h1>{{ .Title }}</h1>
 {{ with .Content }}<div class="search-intro">{{ . }}</div>{{ end }}
+{{- $indexURL := "" }}{{ with site.Home.OutputFormats.Get "json" }}{{ $indexURL = .Permalink }}{{ end }}
 <div class="search-page">
   <label class="search-page-label" for="search-page-input">{{ site.Params.label_search | default "검색" }}</label>
   <input type="search" id="search-page-input" class="search-input" placeholder="{{ site.Params.label_search_placeholder | default "글 검색…" }}"
          autocomplete="off" autofocus data-search-input data-search-results="#search-page-results"
-         data-index-url="{{ "index.json" | absURL }}" data-limit="20" data-excerpt="true" data-search-query="true"
+         data-index-url="{{ $indexURL }}" data-limit="20" data-excerpt="true" data-search-query="true"
          data-empty-label="{{ site.Params.label_search_empty | default "결과 없음" }}">
   <ul class="search-results search-page-results" id="search-page-results" hidden></ul>
   <noscript>

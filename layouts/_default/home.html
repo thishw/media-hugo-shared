@@ -1,5 +1,8 @@
 {{ define "main" }}
 {{ if eq site.Params.home_layout "magazine" }}
+{{- /* F8: 매거진 히어로는 <span>, 카테고리 섹션은 <h2> — h1이 0개였다.
+       숨김 h1을 모든 페이지(1페이지 이후 포함)에 렌더해 헤딩 순서를 보정한다. */}}
+<h1 class="visually-hidden">{{ .Title }}</h1>
 {{ $posts := where .Site.RegularPages "Section" "posts" }}
 {{ $paginator := .Paginate $posts }}
 {{ $gridPages := $paginator.Pages }}
@@ -91,28 +94,6 @@
   </li>
   {{ end }}
 </ul>
-{{ if gt $paginator.TotalPages 1 }}
-<nav class="pagination" aria-label="{{ site.Params.label_pagination | default "페이지 내비게이션" }}">
-  {{ if $paginator.HasPrev }}
-    <a class="pagination-prev" href="{{ $paginator.Prev.URL }}">{{ site.Params.label_prev | default "← 이전" }}</a>
-  {{ else }}
-    <span class="pagination-prev is-disabled">{{ site.Params.label_prev | default "← 이전" }}</span>
-  {{ end }}
-  <span class="pagination-pages">
-    {{ range $paginator.Pagers }}
-      {{ if eq .PageNumber $paginator.PageNumber }}
-        <span class="pagination-page is-current">{{ .PageNumber }}</span>
-      {{ else }}
-        <a class="pagination-page" href="{{ .URL }}">{{ .PageNumber }}</a>
-      {{ end }}
-    {{ end }}
-  </span>
-  {{ if $paginator.HasNext }}
-    <a class="pagination-next" href="{{ $paginator.Next.URL }}">{{ site.Params.label_next | default "다음 →" }}</a>
-  {{ else }}
-    <span class="pagination-next is-disabled">{{ site.Params.label_next | default "다음 →" }}</span>
-  {{ end }}
-</nav>
-{{ end }}
+{{ partial "pagination.html" (dict "paginator" $paginator) }}
 {{ end }}
 {{ end }}

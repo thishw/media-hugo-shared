@@ -1,0 +1,38 @@
+{{- /*
+  lang-switch.html — 언어 전환 UI (F2). hugo.Sites 순회로 자동 생성 — 하드코딩 언어 없음.
+  (site.Languages/.LanguageName은 Hugo 0.156/0.158 폐기 경고 대상이라 hugo.Sites/.Language.Label 사용)
+  번역 페어가 있으면 그 페이지로, 없으면 그 언어의 홈으로 링크한다(404 회피).
+  언어가 1개뿐인 사이트에서는 아무것도 렌더하지 않는다.
+  사용법: {{ partial "lang-switch.html" . }}
+*/ -}}
+{{- if gt (len hugo.Sites) 1 -}}
+{{- $cur := . -}}
+{{- $links := slice -}}
+{{- range hugo.Sites -}}
+  {{- $lang := .Language -}}
+  {{- $target := "" -}}
+  {{- range $cur.AllTranslations -}}
+    {{- if eq .Language.Lang $lang.Lang }}{{ $target = .RelPermalink }}{{ end -}}
+  {{- end -}}
+  {{- if not $target -}}
+    {{- range site.Home.AllTranslations -}}
+      {{- if eq .Language.Lang $lang.Lang }}{{ $target = .RelPermalink }}{{ end -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $links = $links | append (dict "lang" $lang.Lang "name" $lang.Label "url" $target "current" (eq $lang.Lang $cur.Language.Lang)) -}}
+{{- end -}}
+{{- if gt (len $links) 2 }}
+<details class="lang-switch lang-switch-dropdown">
+  <summary class="lang-switch-current">{{ range $links }}{{ if .current }}{{ .name }}{{ end }}{{ end }}</summary>
+  <ul class="lang-switch-list">
+    {{- range $links }}
+    <li><a href="{{ .url }}" hreflang="{{ .lang }}" lang="{{ .lang }}"{{ if .current }} aria-current="true"{{ end }} class="lang-switch-link{{ if .current }} is-current{{ end }}">{{ .name }}</a></li>
+    {{- end }}
+  </ul>
+</details>
+{{- else }}
+<nav class="lang-switch lang-switch-inline" aria-label="Language">
+  {{- range $i, $l := $links }}{{ if gt $i 0 }}<span class="lang-switch-sep">·</span>{{ end }}<a href="{{ $l.url }}" hreflang="{{ $l.lang }}" lang="{{ $l.lang }}"{{ if $l.current }} aria-current="true"{{ end }} class="lang-switch-link{{ if $l.current }} is-current{{ end }}">{{ $l.name }}</a>{{ end -}}
+</nav>
+{{- end }}
+{{- end -}}

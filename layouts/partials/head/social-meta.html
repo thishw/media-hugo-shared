@@ -1,5 +1,6 @@
 {{- $title := cond .IsHome .Site.Title (printf "%s | %s" .Title .Site.Title) -}}
-{{- $desc := .Description | default .Site.Params.description -}}
+{{- /* F3: baseof.html이 계산한 값을 재사용 — 두 곳에 폴백 로직을 복붙하지 않는다 */ -}}
+{{- $desc := .Store.Get "meta_description" -}}
 {{- $ogtype := cond .IsHome "website" "article" -}}
 {{- $img := .Params.og_image | default .Site.Params.og_image -}}
 <meta property="og:title" content="{{ $title }}">

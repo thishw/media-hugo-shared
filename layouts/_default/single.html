@@ -3,16 +3,16 @@
   <header>
     {{ $catPage := "" }}{{ with .GetTerms "categories" }}{{ $catPage = index . 0 }}{{ end }}
     <nav class="breadcrumb" aria-label="breadcrumb">
-      <a href="{{ site.BaseURL }}">{{ site.Params.label_home | default "홈" }}</a>
+      <a href="{{ site.Home.RelPermalink }}">{{ site.Params.label_home | default "홈" }}</a>
       {{ with $catPage }} <span class="crumb-sep">›</span> <a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}
     </nav>
     <h1>{{ .Title }}</h1>
-    {{ if eq .Section "posts" }}<time>{{ .Date.Format "2006-01-02" }}</time>{{ end }}
+    {{ if eq .Section "posts" }}<time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format (site.Params.date_format | default "2006-01-02") }}</time>{{ end }}
     {{- /* 글별 AI 일러스트 히어로 (Syndicator D15) — 글 자체 og_image가 있을 때만.
            site.Params.og_image(기본 OG 카드) 폴백은 소셜 메타 전용이라 본문엔 안 건다. */ -}}
     {{- if and (eq .Section "posts") .Params.og_image site.Params.show_hero }}
     <figure class="post-hero">
-      <img src="{{ .Params.og_image | absURL }}" alt="{{ .Title }}" width="1200" height="675" loading="lazy" decoding="async">
+      <img src="{{ .Params.og_image | absURL }}" alt="{{ .Title }}" width="1200" height="675" loading="eager" fetchpriority="high" decoding="async">
       <figcaption class="post-hero-caption">{{ site.Params.label_ai_image | default "AI-generated illustration" }}</figcaption>
     </figure>
     {{- end }}
@@ -64,7 +64,7 @@
     {{ dict
         "@context" "https://schema.org" "@type" "BreadcrumbList"
         "itemListElement" (slice
-          (dict "@type" "ListItem" "position" 1 "name" (site.Params.label_home | default "홈") "item" site.BaseURL)
+          (dict "@type" "ListItem" "position" 1 "name" (site.Params.label_home | default "홈") "item" site.Home.Permalink)
           (dict "@type" "ListItem" "position" 2 "name" $catPage.Title "item" $catPage.Permalink)
           (dict "@type" "ListItem" "position" 3 "name" .Title))
       | jsonify | safeJS }}
@@ -77,40 +77,38 @@
         "@context" "https://schema.org"
         "@type" "BreadcrumbList"
         "itemListElement" (slice
-          (dict "@type" "ListItem" "position" 1 "name" (site.Params.label_home | default "홈") "item" site.BaseURL)
+          (dict "@type" "ListItem" "position" 1 "name" (site.Params.label_home | default "홈") "item" site.Home.Permalink)
           (dict "@type" "ListItem" "position" 2 "name" $catPage.Title "item" $catPage.Permalink)
           (dict "@type" "ListItem" "position" 3 "name" .Title))
       | jsonify | safeJS }}
     </script>
     {{ end }}
     {{ if eq .Section "posts" }}
-    <script type="application/ld+json">
-    {{ dict
+    {{- $bp := dict
         "@context" "https://schema.org"
         "@type" "BlogPosting"
         "headline" .Title
-        "description" (.Description | default "")
         "datePublished" (.Date.Format "2006-01-02")
         "dateModified" (.Lastmod.Format "2006-01-02")
         "inLanguage" (site.Language.Lang)
         "mainEntityOfPage" .Permalink
         "keywords" (delimit (.Params.keywords | default slice) ", ")
-
         "author" (dict "@type" "Person" "name" (site.Params.author | default site.Title))
         "publisher" (dict "@type" "Organization" "name" site.Title "url" site.BaseURL)
-      | jsonify | safeJS }}
-    </script>
+    -}}
+    {{- /* F15: 값이 없으면 키 자체를 생략 — 빈 문자열을 송출하지 않는다 */ -}}
+    {{- with .Description }}{{ $bp = merge $bp (dict "description" .) }}{{ end }}
+    <script type="application/ld+json">{{ $bp | jsonify | safeJS }}</script>
     {{ else }}
-    <script type="application/ld+json">
-    {{ dict
+    {{- $wp := dict
         "@context" "https://schema.org"
         "@type" (cond (eq .File.ContentBaseName "about") "AboutPage" "WebPage")
         "name" .Title
-        "description" (.Description | default "")
         "inLanguage" (site.Language.Lang)
         "url" .Permalink
-      | jsonify | safeJS }}
-    </script>
+    -}}
+    {{- with .Description }}{{ $wp = merge $wp (dict "description" .) }}{{ end }}
+    <script type="application/ld+json">{{ $wp | jsonify | safeJS }}</script>
     {{ end }}
     {{- end }}
   </header>

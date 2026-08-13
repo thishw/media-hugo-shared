@@ -369,6 +369,55 @@ details.sources li:last-child { margin-bottom: 0; }
 }
 .nav-search:hover { color: var(--link); }
 
+/* ── Language switcher (F2) ───────────────────────────────────── */
+.lang-switch { display: flex; align-items: center; font-size: 0.9rem; white-space: nowrap; }
+.lang-switch-link { color: var(--text-nav); text-decoration: none; }
+.lang-switch-link:hover { color: var(--link); }
+.lang-switch-link.is-current { color: var(--text); font-weight: 600; }
+.lang-switch-sep { margin: 0 0.4rem; color: var(--text-faint); }
+
+.lang-switch-dropdown { position: relative; }
+.lang-switch-current {
+  cursor: pointer;
+  list-style: none;
+  color: var(--text-nav);
+  font-size: 0.9rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--border-panel);
+  border-radius: 4px;
+}
+.lang-switch-current::-webkit-details-marker { display: none; }
+.lang-switch-current:hover { color: var(--link); }
+.lang-switch-list {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 140px;
+  margin: 0.3rem 0 0;
+  padding: 0.3rem 0;
+  list-style: none;
+  background: var(--surface-panel);
+  border: 1px solid var(--border-panel);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px var(--shadow);
+  z-index: 100;
+}
+.lang-switch-list .lang-switch-link { display: block; padding: 0.35rem 1rem; }
+.lang-switch-list .lang-switch-link:hover { background: var(--surface-nav-hover); }
+
+/* ── Accessibility utilities ──────────────────────────────────── */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Top-level menu list */
 .menu-list {
   display: flex;

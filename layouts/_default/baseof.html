@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
-  {{ with .Description }}<meta name="description" content="{{ . }}">{{ end }}
+  {{- /* F3: 폴백을 여기 한 곳에서 계산해 .Store 로 공유 — social-meta.html 이 재계산하지 않는다 */ -}}
+  {{ $desc := .Description | default .Site.Params.description }}
+  {{ .Store.Set "meta_description" $desc }}
+  {{ with $desc }}<meta name="description" content="{{ . }}">{{ end }}
   {{ with .Params.keywords }}<meta name="keywords" content="{{ delimit . ", " }}">{{ end }}
   {{ with .Permalink }}<link rel="canonical" href="{{ . }}">{{ end }}
   {{ if partial "is-noindex.html" . }}<meta name="robots" content="noindex,follow">{{ end }}
@@ -12,6 +15,13 @@
   {{ if .IsTranslated }}
   {{ range .AllTranslations }}<link rel="alternate" hreflang="{{ .Language.Lang }}" href="{{ .Permalink }}">
   {{ end }}
+  {{- /* F13: x-default = 언어 접두사 없이 루트("/")에 있는 번역판.
+         defaultContentLanguageInSubdir=false 라 기본 언어의 홈은 항상 "/" —
+         .Site.DefaultContentLanguage 필드가 이 Hugo 버전 템플릿에 노출되지 않아
+         URL 구조로 직접 판별한다. */ -}}
+  {{- range .AllTranslations }}{{ if eq .Site.Home.RelPermalink "/" }}
+  <link rel="alternate" hreflang="x-default" href="{{ .Permalink }}">
+  {{- end }}{{ end }}
   {{ end }}
   {{ partial "head/social-meta.html" . }}
   {{ partial "head/gtm.html" . }}
@@ -32,7 +42,7 @@
       {{- /* 다크 워드마크는 params.logo_dark 가 있을 때만 <picture> 로 분기한다 —
              자산이 없는 매체는 라이트 로고 그대로(폴백). 다크 배경이 실존하게 된
              뒤의 복원이라 2440b13(다크 배경 없이 스왑) 문제는 재발하지 않는다. */ -}}
-      {{ $logo := site.Params.logo }}{{ $logoDark := site.Params.logo_dark }}<a class="site-title" href="{{ .Site.BaseURL }}">{{ if $logo }}{{ if $logoDark }}<picture><source srcset="{{ $logoDark }}" media="(prefers-color-scheme: dark)"><img class="site-logo" src="{{ $logo }}" alt="{{ .Site.Title }}"></picture>{{ else }}<img class="site-logo" src="{{ $logo }}" alt="{{ .Site.Title }}">{{ end }}{{ else }}{{ .Site.Title }}{{ end }}</a>
+      {{ $logo := site.Params.logo }}{{ $logoDark := site.Params.logo_dark }}<a class="site-title" href="{{ .Site.Home.RelPermalink }}">{{ if $logo }}{{ if $logoDark }}<picture><source srcset="{{ $logoDark }}" media="(prefers-color-scheme: dark)"><img class="site-logo" src="{{ $logo }}" alt="{{ .Site.Title }}"></picture>{{ else }}<img class="site-logo" src="{{ $logo }}" alt="{{ .Site.Title }}">{{ end }}{{ else }}{{ .Site.Title }}{{ end }}</a>
       {{- with site.Menus.main }}
       <div class="nav-menu">
         {{ partial "menu.html" (dict "page" $ "menuEntries" .) }}
@@ -42,6 +52,7 @@
       {{- with site.GetPage "/search" }}
       <a class="nav-search" href="{{ .RelPermalink }}">{{ site.Params.label_search | default "검색" }}</a>
       {{- end }}
+      {{- partial "lang-switch.html" . }}
     </nav>
   </header>
   <div class="layout">

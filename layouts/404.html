@@ -1,0 +1,13 @@
+{{- /* F18: GitHub 기본 404 대신 마스트헤드+검색 유도가 있는 404 페이지.
+       label_404_* 같은 새 파라미터를 추가하면 미설정 매체에서 F9와 같은 종류의
+       하드코딩 언어 누출이 재발한다 — 대신 이미 3사 전부에 설정된 label_home/
+       label_search만 재사용하고, 나머지 문구는 site.Language.Lang 2분기로 처리한다. */ -}}
+{{- define "main" }}
+{{- $ko := eq site.Language.Lang "ko" }}
+<h1>{{ if $ko }}페이지를 찾을 수 없습니다{{ else }}Page Not Found{{ end }}</h1>
+<p>{{ if $ko }}요청하신 페이지가 존재하지 않거나 이동되었습니다.{{ else }}The page you requested doesn't exist or has moved.{{ end }}</p>
+<p><a href="{{ site.Home.RelPermalink }}">{{ site.Params.label_home | default (cond $ko "홈으로" "Back to Home") }}</a></p>
+{{- with site.GetPage "/search" }}
+<p><a href="{{ .RelPermalink }}">{{ site.Params.label_search | default (cond $ko "검색" "Search") }}</a></p>
+{{- end }}
+{{- end }}
