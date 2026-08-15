@@ -88,8 +88,8 @@
         "@context" "https://schema.org"
         "@type" "BlogPosting"
         "headline" .Title
-        "datePublished" (.Date.Format "2006-01-02")
-        "dateModified" (.Lastmod.Format "2006-01-02")
+        "datePublished" (.Date.Format "2006-01-02T15:04:05Z07:00")
+        "dateModified" (.Lastmod.Format "2006-01-02T15:04:05Z07:00")
         "inLanguage" (site.Language.Lang)
         "mainEntityOfPage" .Permalink
         "keywords" (delimit (.Params.keywords | default slice) ", ")
