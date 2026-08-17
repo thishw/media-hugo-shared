@@ -15,8 +15,22 @@
 {{- with .Site.Params.og_locale }}
 <meta property="og:locale" content="{{ . }}">
 {{- end }}
+{{- /* alt은 이미지 설명이므로 사이트명 접미사가 붙은 $title이 아니라 글 제목을 쓴다
+       (본문 히어로 <img alt>과 동일 값 — 두 곳이 어긋나지 않게). with 블록 안에서는
+       `.`이 이미지 문자열이므로 페이지 컨텍스트를 미리 담아둔다. */ -}}
+{{- $imgAlt := cond .IsHome .Site.Title .Title -}}
 {{- with $img }}
 <meta property="og:image" content="{{ . | absURL }}">
+<meta property="og:image:alt" content="{{ $imgAlt }}">
+{{- end }}
+{{- /* 치수는 **글별 일러스트일 때만** 명시한다 — 1200x675 고정 규격(Syndicator
+       article_image.py)이라 값이 확정적이다. 사이트 기본 OG 카드는 1200x630이라
+       규격이 다르므로, 폴백으로 내려온 경우에는 치수를 주장하지 않는다.
+       (치수를 주는 이유: 첫 공유 시 크롤러가 이미지를 가져오기 전에도 카드가
+       큰 이미지로 렌더된다.) */ -}}
+{{- with .Params.og_image }}
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="675">
 {{- end }}
 {{- if not .IsHome }}{{ with .PublishDate }}
 <meta property="article:published_time" content="{{ .Format "2006-01-02T15:04:05Z07:00" }}">
