@@ -11,8 +11,23 @@
     {{- /* 글별 AI 일러스트 히어로 (Syndicator D15) — 글 자체 og_image가 있을 때만.
            site.Params.og_image(기본 OG 카드) 폴백은 소셜 메타 전용이라 본문엔 안 건다. */ -}}
     {{- if and (eq .Section "posts") .Params.og_image site.Params.show_hero }}
+    {{- /* WebP 우선(2026-08-18): 히어로가 LCP 요소이자 페이지 무게의 대부분이고,
+           같은 그림의 WebP가 JPEG의 절반 이하다(실측 106KB→49.6KB). 엔진이 같은
+           stem의 .webp를 함께 커밋하므로 **파일이 있을 때만** <source>를 낸다 —
+           없는데 내면 브라우저가 <img>로 폴백하지 않고 깨진 이미지를 보여준다.
+           og:image·JSON-LD는 호환성 때문에 JPEG 그대로 둔다(여기서만 WebP). */ -}}
+    {{- $jpeg := .Params.og_image -}}
+    {{- $webp := printf "%s.webp" (strings.TrimSuffix (path.Ext $jpeg) $jpeg) -}}
+    {{- $hasWebp := fileExists (printf "static/%s" $webp) -}}
     <figure class="post-hero">
-      <img src="{{ .Params.og_image | absURL }}" alt="{{ .Title }}" width="1200" height="675" loading="eager" fetchpriority="high" decoding="async">
+      {{- if $hasWebp }}
+      <picture>
+        <source srcset="{{ $webp | absURL }}" type="image/webp">
+        <img src="{{ $jpeg | absURL }}" alt="{{ .Title }}" width="1200" height="675" loading="eager" fetchpriority="high" decoding="async">
+      </picture>
+      {{- else }}
+      <img src="{{ $jpeg | absURL }}" alt="{{ .Title }}" width="1200" height="675" loading="eager" fetchpriority="high" decoding="async">
+      {{- end }}
       <figcaption class="post-hero-caption">{{ site.Params.label_ai_image | default "AI-generated illustration" }}</figcaption>
     </figure>
     {{- end }}
