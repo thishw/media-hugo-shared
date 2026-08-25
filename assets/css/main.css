@@ -596,3 +596,9 @@ details.sources li:last-child { margin-bottom: 0; }
     --shadow: rgba(0, 0, 0, 0.5);
   }
 }
+
+/* 편집 책임자 바이라인 (E-E-A-T) — site.Params.author 설정 사이트에서만 렌더된다 */
+.byline { font-size: .85rem; color: #6b6b6b; margin: .25rem 0 0; }
+.byline a { color: #6b6b6b; text-decoration: underline; }
+.byline a:hover { color: var(--link-hover); }
+.byline-role::before { content: "· "; }

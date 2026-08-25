@@ -8,6 +8,16 @@
     </nav>
     <h1>{{ .Title }}</h1>
     {{ if eq .Section "posts" }}<time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format (site.Params.date_format | default "2006-01-02") }}</time>{{ end }}
+    {{- /* 편집 책임자 바이라인 (E-E-A-T) — site.Params.author가 있을 때만 낸다.
+           미설정 사이트는 이 줄 자체가 렌더되지 않아 기존과 바이트 동일하다. */ -}}
+    {{- if and (eq .Section "posts") site.Params.author }}
+    <p class="byline">
+      {{ site.Params.label_byline | default "Edited by" }}
+      {{- with site.Params.author_url }} <a rel="author" href="{{ . }}">{{ site.Params.author }}</a>
+      {{- else }} <span rel="author">{{ site.Params.author }}</span>{{ end }}
+      {{- with site.Params.author_role }} <span class="byline-role">{{ . }}</span>{{ end }}
+    </p>
+    {{- end }}
     {{- /* 글별 AI 일러스트 히어로 (Syndicator D15) — 글 자체 og_image가 있을 때만.
            site.Params.og_image(기본 OG 카드) 폴백은 소셜 메타 전용이라 본문엔 안 건다. */ -}}
     {{- if and (eq .Section "posts") .Params.og_image site.Params.show_hero }}
@@ -35,13 +45,20 @@
     {{- if or (eq $mt "news") (eq $mt "local_business") (eq $mt "webpage") -}}
     {{- /* Syndicator 매체: pulse 검증 로직 — main-entity JSON-LD 정확히 1개, breadcrumb JSON-LD 포함(카테고리 존재 시) */ -}}
     {{- $org := dict "@type" "Organization" "name" site.Title "url" site.BaseURL -}}
+    {{- /* E-E-A-T: 편집 책임자가 지정된 사이트는 author를 Person으로 낸다.
+           미지정이면 $org 그대로 — 기존 산출물 무변경. publisher는 항상 Organization. */ -}}
+    {{- $author := $org -}}
+    {{- with site.Params.author -}}
+      {{- $author = dict "@type" "Person" "name" . -}}
+      {{- with site.Params.author_url }}{{ $author = merge $author (dict "url" .) }}{{ end -}}
+    {{- end -}}
     {{- $article := dict
           "@context" "https://schema.org" "headline" .Title
           "description" (.Description | default (.Summary | plainify))
           "datePublished" (.Date.Format "2006-01-02T15:04:05Z07:00")
           "dateModified" (.Lastmod.Format "2006-01-02T15:04:05Z07:00")
           "inLanguage" (site.Language.LanguageCode | default "en")
-          "mainEntityOfPage" .Permalink "url" .Permalink "author" $org "publisher" $org -}}
+          "mainEntityOfPage" .Permalink "url" .Permalink "author" $author "publisher" $org -}}
     {{- /* 글별 일러스트(Syndicator D15)를 구조화 데이터에도 노출 — Google Article
            가이드의 image 권장 속성. 규격은 1200x675 고정(article_image.py
            TARGET_WIDTH/HEIGHT, 위 히어로 마크업과 동일 전제)이다. 사이트 기본
