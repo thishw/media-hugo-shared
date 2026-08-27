@@ -550,7 +550,7 @@ details.sources li:last-child { margin-bottom: 0; }
 
 /* ── 글별 AI 일러스트 히어로 (show_hero 게이트, Syndicator D15) ── */
 .post-hero { margin: 1.1rem 0 1.4rem; }
-.post-hero img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 8px; background: var(--surface-chip); }
+.post-hero img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 8px; background: var(--surface-chip); max-height: 280px; }
 .post-hero-caption { font-size: 0.78rem; color: var(--text-caption); margin-top: 0.4rem; text-align: right; }
 
 /* ── 다크 모드 (자동 — prefers-color-scheme, 토글 없음) ─────────
