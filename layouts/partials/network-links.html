@@ -1,0 +1,11 @@
+{{- /*
+  network-links.html — 자매 매체 내비게이션 (WP-W)
+  데이터는 site.Params.network_links([[params.network_links]], name/url)에서만 온다 —
+  테마에 호스트명을 하드코딩하지 않는다(테마는 세 매체가 공유하는 중립 자산).
+  params가 비어 있으면 아무것도 렌더하지 않는다(빈 <nav>도 남기지 않음).
+*/ -}}
+{{- with site.Params.network_links }}
+<nav class="network-links">
+  <p>{{- range $i, $e := . }}{{ if $i }} · {{ end }}<a href="{{ $e.url }}">{{ $e.name }}</a>{{ end -}}</p>
+</nav>
+{{- end }}

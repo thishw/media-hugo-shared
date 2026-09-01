@@ -63,6 +63,7 @@
   </div>
   <footer>
     <p>© {{ now.Year }} {{ .Site.Params.author | default .Site.Title }} · All rights reserved.{{ with .Site.GetPage "/about" }} · <a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}{{ with .Site.GetPage "/privacy" }} · <a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}</p>
+    {{ partial "network-links.html" . }}
   </footer>
   {{ if .Store.Get "hasMermaid" }}
   <script type="module">
