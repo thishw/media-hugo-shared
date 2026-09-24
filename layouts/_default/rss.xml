@@ -17,6 +17,12 @@
     {{- with .OutputFormats.Get "RSS" }}
     {{ printf "<atom:link href=%q rel=\"self\" type=%q />" .Permalink .MediaType | safeHTML }}
     {{- end }}
+    {{- /* WebSub 허브(옵트인, 2026-09-25) — site.Params.websubhub 가 있을 때만 선언한다.
+         구글 운영 허브(pubsubhubbub.appspot.com)에 갱신을 알리면 구글 피드 수집기가 즉시 가져간다.
+         미지정 사이트는 산출물 바이트 동일(무회귀). */ -}}
+    {{- with site.Params.websubhub }}
+    {{ printf "<atom:link href=%q rel=\"hub\" />" . | safeHTML }}
+    {{- end }}
     {{- range $pages }}
     <item>
       <title>{{ .Title }}</title>
