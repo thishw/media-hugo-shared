@@ -10,7 +10,7 @@
   {{ with $desc }}<meta name="description" content="{{ . }}">{{ end }}
   {{ with .Params.keywords }}<meta name="keywords" content="{{ delimit . ", " }}">{{ end }}
   {{ with .Permalink }}<link rel="canonical" href="{{ . }}">{{ end }}
-  {{ if partial "is-noindex.html" . }}<meta name="robots" content="noindex,follow">{{ end }}
+  {{ if partial "is-noindex.html" . }}<meta name="robots" content="noindex,follow">{{ else if partial "is-google-pruned.html" . }}<meta name="googlebot" content="noindex,follow">{{ end }}
   {{ with .Site.Home.OutputFormats.Get "rss" }}<link rel="alternate" type="{{ .MediaType.Type }}" href="{{ .Permalink }}" title="{{ $.Site.Title }}">{{ end }}
   {{ if .IsTranslated }}
   {{ range .AllTranslations }}<link rel="alternate" hreflang="{{ .Language.Lang }}" href="{{ .Permalink }}">

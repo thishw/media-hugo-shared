@@ -1,0 +1,17 @@
+{{- /*
+  구글 전용 정리(옵트인, 2026-09-27) — site.Params.googleprune 가 true일 때만 작동한다.
+  반환: true = 구글에는 색인 대상으로 내밀지 않는 글(googlebot noindex + 사이트맵 제외).
+
+  기준 = 자체 계산 파생값(Charter 5-6 축 A) 블록의 유무. 발행기가 그 블록 앞에 남기는
+  마커(syndicator `fusion/writer.py` DERIVED_BLOCK_MARKER — 값을 바꾸면 여기도 바꾼다)가
+  본문에 없으면 «우리가 계산한 값이 없는 뉴스 재작성»이다.
+
+  robots가 아니라 googlebot만 막는 이유: Bing·네이버는 같은 글을 이미 색인하고 있다.
+  구글은 이 도메인을 «Low value content»로 판정한 상태라, 구글이 표본으로 읽는 페이지를
+  고유 가치가 있는 글로 좁힌다. 파라미터를 끄면 전부 원상 복구된다(콘텐츠 무수정).
+*/ -}}
+{{- $pruned := false -}}
+{{- if and (eq (printf "%v" (site.Params.googleprune | default false)) "true") (eq .Kind "page") (eq .Section "posts") -}}
+  {{- $pruned = not (strings.Contains .RawContent "<!-- syndicator:derived-data -->") -}}
+{{- end -}}
+{{- return $pruned -}}
