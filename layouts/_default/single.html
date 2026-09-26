@@ -157,6 +157,7 @@
   </header>
   <div class="content">
     {{ .Content }}
+    {{- if eq .Section "posts" }}{{ partial "disclaimer.html" . }}{{- end }}
     {{- if site.Params.show_term_chips }}
 <div class="post-terms">
   {{ range .GetTerms "categories" }}<a class="term-chip" href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}
