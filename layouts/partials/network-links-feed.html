@@ -1,0 +1,54 @@
+{{- /*
+  network-links-feed.html — network-links.html 전용 헬퍼(옵트인, 2026-09-28).
+  context(.)는 site.Params.network_links 항목 하나. .feed가 없으면 빈 문자열을
+  낸다(호출부의 무회귀 보장은 이 partial이 빈 문자열을 내는 데 달려 있다).
+  .feed가 있으면 그 RSS를 가져와 최신 .latest(기본 5)개 "/posts/" 기사 링크를
+  목록으로 낸다. 가져오기·파싱 실패는 warnf만 남기고 빈 문자열로 되돌아간다.
+*/ -}}
+{{- $e := . -}}
+{{- if $e.feed -}}
+  {{- $feedHost := ($e.feed | urls.Parse).Host -}}
+  {{- $selfHost := (site.BaseURL | urls.Parse).Host -}}
+  {{- if ne $feedHost $selfHost -}}
+    {{- $latest := $e.latest | default 5 -}}
+    {{- $fetch := try (resources.GetRemote $e.feed) -}}
+    {{- if $fetch.Err -}}
+      {{- warnf "network-links: %s feed 가져오기 실패(%s): %v" $e.name $e.feed $fetch.Err -}}
+    {{- else if not $fetch.Value -}}
+      {{- warnf "network-links: %s feed 가져오기 실패(%s): 응답 없음(2xx 아님)" $e.name $e.feed -}}
+    {{- else -}}
+      {{- with $fetch.Value -}}
+        {{- $parse := try (. | transform.Unmarshal) -}}
+        {{- if $parse.Err -}}
+          {{- warnf "network-links: %s feed 파싱 실패(%s): %v" $e.name $e.feed $parse.Err -}}
+        {{- else -}}
+          {{- with $parse.Value -}}
+            {{- $rawItems := .channel.item -}}
+            {{- $items := slice -}}
+            {{- if $rawItems -}}
+              {{- if reflect.IsSlice $rawItems -}}
+                {{- $items = $rawItems -}}
+              {{- else -}}
+                {{- $items = slice $rawItems -}}
+              {{- end -}}
+            {{- end -}}
+            {{- $posts := slice -}}
+            {{- range $items -}}
+              {{- if and .link (in .link "/posts/") -}}
+                {{- $posts = $posts | append . -}}
+              {{- end -}}
+            {{- end -}}
+            {{- with first $latest $posts }}
+  <ul class="network-links-latest" style="margin:0.35rem 0 0 0;padding:0;list-style:none;font-size:0.78rem;line-height:1.5;color:var(--text-meta);">
+    <li style="font-weight:600;">{{ $e.name }}</li>
+    {{- range . }}
+    <li><a href="{{ .link }}">{{ .title }}</a></li>
+    {{- end }}
+  </ul>
+            {{- end -}}
+          {{- end -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
