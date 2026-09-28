@@ -7,10 +7,22 @@ dataLayer.push({
 });
 </script>
 <!-- Google Tag Manager -->
+{{- if $.Site.Params.gtmdefer }}
+{{- /* gtmdefer(옵트인, 2026-09-28): 분석 태그(GTM·gtag ~300KB)를 load 이후로 미룬다.
+       모바일에서 대표 이미지(LCP)와 대역폭을 다투던 것을 떼어 낸다 — 측정: 대표 이미지 61KB vs 서드파티 JS ~530KB.
+       dataLayer 초기화·gtm.start 시각은 즉시 기록한다(세션 시작 시각 보존). 광고 코드(adsbygoogle)는 건드리지 않는다. */ -}}
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});function g(){var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);}
+if(d.readyState==='complete'){g()}else{w.addEventListener('load',g)}
+})(window,document,'script','dataLayer','{{ . }}');</script>
+{{- else }}
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','{{ . }}');</script>
+{{- end }}
 <!-- End Google Tag Manager -->
 {{- end -}}
