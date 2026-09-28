@@ -5,6 +5,20 @@
 */}}
 {{ if eq .Section "posts" }}
   {{ $related := where (site.RegularPages.Related .) "Section" "posts" | first 4 }}
+  {{- /* 관련 글이 3개 미만이면 같은 섹션 최신 글로 채운다(2026-09-28) — 키워드가 글마다 달라
+         Related가 비는 매체(pulse)에서 기사가 내부 링크 없는 외딴섬이 되는 것을 막는다.
+         내부 링크는 크롤러가 글 사이를 건너다니는 경로다. 자기 자신·중복은 제외. */ -}}
+  {{- if lt (len $related) 3 -}}
+    {{- $self := .Permalink -}}
+    {{- $seen := slice $self -}}
+    {{- range $related }}{{ $seen = $seen | append .Permalink }}{{ end -}}
+    {{- range (where site.RegularPages "Section" "posts").ByDate.Reverse -}}
+      {{- if and (lt (len $related) 4) (not (in $seen .Permalink)) -}}
+        {{- $related = $related | append . -}}
+        {{- $seen = $seen | append .Permalink -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end }}
   {{ with $related }}
   <nav class="related-posts" aria-label="{{ site.Params.label_related | default "관련 글" }}">
     <h2>{{ site.Params.label_related | default "관련 글" }}</h2>
