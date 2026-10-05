@@ -1,0 +1,10 @@
+{{- /* 글별 일러스트의 실제 치수 (2026-10-05). 입력: og_image 상대 경로("images/posts/x.jpg").
+       예전엔 1200x675(16:9) 고정을 전제했지만, 엔진이 원본 비율(생성기 3:2)을 자르지 않고
+       싣도록 바뀌어 글마다 비율이 다를 수 있다. 파일에서 직접 읽고, 못 읽으면 옛 규격을
+       돌려준다(옛 글은 전부 1200x675라 결과가 같다). */ -}}
+{{- $dims := dict "w" 1200 "h" 675 -}}
+{{- $p := path.Join "static" . -}}
+{{- if fileExists $p -}}
+  {{- with images.Config $p -}}{{- $dims = dict "w" .Width "h" .Height -}}{{- end -}}
+{{- end -}}
+{{- return $dims -}}

@@ -27,16 +27,17 @@
            없는데 내면 브라우저가 <img>로 폴백하지 않고 깨진 이미지를 보여준다.
            og:image·JSON-LD는 호환성 때문에 JPEG 그대로 둔다(여기서만 WebP). */ -}}
     {{- $jpeg := .Params.og_image -}}
+    {{- $dims := partial "post-image-dims.html" $jpeg -}}
     {{- $webp := printf "%s.webp" (strings.TrimSuffix (path.Ext $jpeg) $jpeg) -}}
     {{- $hasWebp := fileExists (printf "static/%s" $webp) -}}
     <figure class="post-hero">
       {{- if $hasWebp }}
       <picture>
         <source srcset="{{ $webp | absURL }}" type="image/webp">
-        <img src="{{ $jpeg | absURL }}" alt="{{ .Title }}" width="1200" height="675" loading="eager" fetchpriority="high" decoding="async">
+        <img src="{{ $jpeg | absURL }}" alt="{{ .Title }}" width="{{ $dims.w }}" height="{{ $dims.h }}" loading="eager" fetchpriority="high" decoding="async">
       </picture>
       {{- else }}
-      <img src="{{ $jpeg | absURL }}" alt="{{ .Title }}" width="1200" height="675" loading="eager" fetchpriority="high" decoding="async">
+      <img src="{{ $jpeg | absURL }}" alt="{{ .Title }}" width="{{ $dims.w }}" height="{{ $dims.h }}" loading="eager" fetchpriority="high" decoding="async">
       {{- end }}
       <figcaption class="post-hero-caption">{{ site.Params.label_ai_image | default "AI-generated illustration" }}</figcaption>
     </figure>
@@ -60,13 +61,14 @@
           "inLanguage" (site.Language.LanguageCode | default "en")
           "mainEntityOfPage" .Permalink "url" .Permalink "author" $author "publisher" $org -}}
     {{- /* 글별 일러스트(Syndicator D15)를 구조화 데이터에도 노출 — Google Article
-           가이드의 image 권장 속성. 규격은 1200x675 고정(article_image.py
-           TARGET_WIDTH/HEIGHT, 위 히어로 마크업과 동일 전제)이다. 사이트 기본
+           가이드의 image 권장 속성. 치수는 파일에서 읽는다(partials/post-image-dims.html —
+           2026-10-05부터 엔진이 원본 비율을 자르지 않아 글마다 다를 수 있다). 사이트 기본
            OG 카드(site.Params.og_image, 1200x630)는 글의 이미지가 아니므로
            폴백하지 않는다 — 전 글이 같은 이미지를 주장하게 만들지 않기 위함. */ -}}
     {{- with .Params.og_image -}}
+      {{- $d := partial "post-image-dims.html" . -}}
       {{- $article = merge $article (dict "image" (dict
-            "@type" "ImageObject" "url" (. | absURL) "width" 1200 "height" 675)) -}}
+            "@type" "ImageObject" "url" (. | absURL) "width" $d.w "height" $d.h)) -}}
     {{- end -}}
     {{- $schema := dict -}}
     {{- if eq $mt "news" -}}
@@ -139,8 +141,8 @@
     -}}
     {{- /* F15: 값이 없으면 키 자체를 생략 — 빈 문자열을 송출하지 않는다 */ -}}
     {{- with .Description }}{{ $bp = merge $bp (dict "description" .) }}{{ end }}
-    {{- with .Params.og_image }}{{ $bp = merge $bp (dict "image" (dict
-          "@type" "ImageObject" "url" (. | absURL) "width" 1200 "height" 675)) }}{{ end }}
+    {{- with .Params.og_image }}{{ $d := partial "post-image-dims.html" . }}{{ $bp = merge $bp (dict "image" (dict
+          "@type" "ImageObject" "url" (. | absURL) "width" $d.w "height" $d.h)) }}{{ end }}
     <script type="application/ld+json">{{ $bp | jsonify | safeJS }}</script>
     {{ else }}
     {{- $wp := dict
