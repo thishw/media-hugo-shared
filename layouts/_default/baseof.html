@@ -5,7 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
   {{- /* F3: 폴백을 여기 한 곳에서 계산해 .Store 로 공유 — social-meta.html 이 재계산하지 않는다 */ -}}
-  {{ $desc := .Description | default .Site.Params.description }}
+  {{- /* F14 (2026-11-09): 설명이 없는 페이지가 전부 사이트 소개문으로 떨어져 네이버 사이트 진단에
+         「동일 설명문 26건」(홈+키워드·카테고리 목록)으로 잡혔다. 목록 페이지(section·taxonomy·term)는
+         「제목 | 사이트명: 상위 글 제목 3개」로, 일반 페이지는 본문 요약으로 폴백하고 사이트 소개문은 홈만 쓴다. */ -}}
+  {{- $desc := .Description -}}
+  {{- if not $desc -}}
+    {{- if .IsHome -}}
+      {{- $desc = .Site.Params.description -}}
+    {{- else if in (slice "section" "taxonomy" "term") .Kind -}}
+      {{- $titles := slice -}}
+      {{- range first 3 .Pages }}{{ $titles = $titles | append .Title }}{{ end -}}
+      {{- $desc = printf "%s | %s" .Title .Site.Title -}}
+      {{- with $titles }}{{ $desc = printf "%s: %s" $desc (delimit . " · ") }}{{ end -}}
+      {{- $desc = $desc | truncate 155 -}}
+    {{- else -}}
+      {{- $desc = .Summary | plainify | truncate 155 | default .Site.Params.description -}}
+    {{- end -}}
+  {{- end }}
   {{ .Store.Set "meta_description" $desc }}
   {{ with $desc }}<meta name="description" content="{{ . }}">{{ end }}
   {{ with .Params.keywords }}<meta name="keywords" content="{{ delimit . ", " }}">{{ end }}
