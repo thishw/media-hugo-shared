@@ -26,6 +26,12 @@
   {{ with $desc }}<meta name="description" content="{{ . }}">{{ end }}
   {{ with .Params.keywords }}<meta name="keywords" content="{{ delimit . ", " }}">{{ end }}
   {{ with .Permalink }}<link rel="canonical" href="{{ . }}">{{ end }}
+  {{- /* F16 (2026-11-09): 파비콘 <link> — 파일은 각 사이트 static/ 에 있었지만 <head> 선언이 없어
+         검색엔진이 /favicon.ico 추측에만 기댔다(네이버 10-15 공지: 파비콘 32px 이상 노출 방식 변경,
+         구글 파비콘 가이드는 <link rel="icon"> 선언 권장). 사이트에 파일이 있을 때만 출력한다. */ -}}
+  {{ if fileExists "static/favicon.ico" }}<link rel="icon" href="/favicon.ico" sizes="48x48">{{ end }}
+  {{ if fileExists "static/favicon.svg" }}<link rel="icon" href="/favicon.svg" type="image/svg+xml">{{ end }}
+  {{ if fileExists "static/apple-touch-icon.png" }}<link rel="apple-touch-icon" href="/apple-touch-icon.png">{{ end }}
   {{ if partial "is-noindex.html" . }}<meta name="robots" content="noindex,follow">{{ else if partial "is-google-pruned.html" . }}<meta name="googlebot" content="noindex,follow">{{ end }}
   {{ with .Site.Home.OutputFormats.Get "rss" }}<link rel="alternate" type="{{ .MediaType.Type }}" href="{{ .Permalink }}" title="{{ $.Site.Title }}">{{ end }}
   {{ if .IsTranslated }}
