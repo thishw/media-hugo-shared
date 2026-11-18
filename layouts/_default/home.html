@@ -13,7 +13,7 @@
   {{ $heroExcerpt := $hero.Description | default $hero.Summary | plainify }}
   <article class="magazine-hero">
     <a class="magazine-hero-link" href="{{ $hero.RelPermalink }}">
-      {{ with $hero.Params.og_image }}<img class="magazine-hero-image" src="{{ . | absURL }}" srcset="{{ . | absURL }} 1200w" sizes="(max-width: 768px) 100vw, 800px" alt="" width="1200" height="675" decoding="async" fetchpriority="high">{{ end }}
+      {{ with $hero.Params.og_image }}{{ partial "magazine-image.html" (dict "src" . "class" "magazine-hero-image" "width" 1200 "height" 675) }}{{ end }}
       <span class="magazine-hero-body">
         {{ with $heroCategory }}<span class="magazine-category-label">{{ . }}</span>{{ end }}
         <span class="magazine-hero-title">{{ $hero.Title }}</span>
@@ -31,7 +31,7 @@
   {{ $cardCategory := "" }}{{ with .GetTerms "categories" }}{{ $cardCategory = (index . 0).Title }}{{ end }}
   <article class="magazine-card{{ if .Params.og_image }} has-image{{ end }}">
     <a class="magazine-card-link" href="{{ .RelPermalink }}">
-      {{ with .Params.og_image }}<img class="magazine-card-image" src="{{ . | absURL }}" alt="" width="640" height="360" loading="lazy" decoding="async">{{ end }}
+      {{ with .Params.og_image }}{{ partial "magazine-image.html" (dict "src" . "class" "magazine-card-image" "width" 640 "height" 360) }}{{ end }}
       <span class="magazine-card-body">
         {{ with $cardCategory }}<span class="magazine-category-label">{{ . }}</span>{{ end }}
         <span class="magazine-card-title">{{ .Title }}</span>
@@ -57,7 +57,7 @@
           {{ range first 4 $termPage.Pages.ByDate.Reverse }}
           <article class="magazine-mini-card{{ if .Params.og_image }} has-image{{ end }}">
             <a href="{{ .RelPermalink }}">
-              {{ with .Params.og_image }}<img src="{{ . | absURL }}" alt="" width="320" height="180" loading="lazy" decoding="async">{{ end }}
+              {{ with .Params.og_image }}{{ partial "magazine-image.html" (dict "src" . "class" "" "width" 320 "height" 180) }}{{ end }}
               <span>{{ .Title }}</span>
             </a>
           </article>

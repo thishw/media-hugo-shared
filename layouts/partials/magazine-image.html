@@ -1,0 +1,7 @@
+{{- $webp := printf "%s.webp" (strings.TrimSuffix (path.Ext .src) .src) -}}
+<picture>
+  {{- if fileExists (path.Join "static" $webp) }}
+  <source type="image/webp" srcset="{{ $webp | absURL }}">
+  {{- end }}
+  <img{{ with .class }} class="{{ . }}"{{ end }} src="{{ .src | absURL }}" alt="" width="{{ .width }}" height="{{ .height }}" {{ if eq .class "magazine-hero-image" }}fetchpriority="high"{{ else }}loading="lazy"{{ end }} decoding="async">
+</picture>

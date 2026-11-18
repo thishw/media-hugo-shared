@@ -13,8 +13,8 @@
     {{- if and (eq .Section "posts") site.Params.author }}
     <p class="byline">
       {{ site.Params.label_byline | default "Edited by" }}
-      {{- with site.Params.author_url }} <a rel="author" href="{{ . }}">{{ site.Params.author }}</a>
-      {{- else }} <span rel="author">{{ site.Params.author }}</span>{{ end }}
+      {{- with site.Params.author_url }} <a{{ if not site.Params.byline_is_editor }} rel="author"{{ end }} href="{{ . }}">{{ site.Params.author }}</a>
+      {{- else }} <span{{ if not site.Params.byline_is_editor }} rel="author"{{ end }}>{{ site.Params.author }}</span>{{ end }}
       {{- with site.Params.author_role }} <span class="byline-role">{{ . }}</span>{{ end }}
     </p>
     {{- end }}
@@ -46,8 +46,7 @@
     {{- if or (eq $mt "news") (eq $mt "local_business") (eq $mt "webpage") -}}
     {{- /* Syndicator 매체: pulse 검증 로직 — main-entity JSON-LD 정확히 1개, breadcrumb JSON-LD 포함(카테고리 존재 시) */ -}}
     {{- $org := dict "@type" "Organization" "name" site.Title "url" site.BaseURL -}}
-    {{- /* E-E-A-T: 편집 책임자가 지정된 사이트는 author를 Person으로 낸다.
-           미지정이면 $org 그대로 — 기존 산출물 무변경. publisher는 항상 Organization. */ -}}
+    {{- /* A named editor can be distinct from the publication credited as author. */ -}}
     {{- $author := $org -}}
     {{- with site.Params.author -}}
       {{- $author = dict "@type" "Person" "name" . -}}
@@ -60,6 +59,9 @@
           "dateModified" (.Lastmod.Format "2006-01-02T15:04:05Z07:00")
           "inLanguage" (site.Language.LanguageCode | default "en")
           "mainEntityOfPage" .Permalink "url" .Permalink "author" $author "publisher" $org -}}
+    {{- if and site.Params.byline_is_editor site.Params.author -}}
+      {{- $article = merge $article (dict "author" $org "editor" $author) -}}
+    {{- end -}}
     {{- /* 글별 일러스트(Syndicator D15)를 구조화 데이터에도 노출 — Google Article
            가이드의 image 권장 속성. 치수는 파일에서 읽는다(partials/post-image-dims.html —
            2026-10-05부터 엔진이 원본 비율을 자르지 않아 글마다 다를 수 있다). 사이트 기본
@@ -140,6 +142,7 @@
         "publisher" (dict "@type" "Organization" "name" site.Title "url" site.BaseURL)
     -}}
     {{- /* F15: 값이 없으면 키 자체를 생략 — 빈 문자열을 송출하지 않는다 */ -}}
+    {{- with site.Params.author_url }}{{ $bp = merge $bp (dict "author" (dict "url" .)) }}{{ end -}}
     {{- with .Description }}{{ $bp = merge $bp (dict "description" .) }}{{ end }}
     {{- with .Params.og_image }}{{ $d := partial "post-image-dims.html" . }}{{ $bp = merge $bp (dict "image" (dict
           "@type" "ImageObject" "url" (. | absURL) "width" $d.w "height" $d.h)) }}{{ end }}

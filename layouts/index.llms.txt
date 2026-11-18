@@ -2,7 +2,7 @@
 
 > {{ site.Params.description }}
 
-{{ with site.Params.author }}Author: {{ . }}
+{{ with site.Params.author }}{{ if site.Params.byline_is_editor }}{{ site.Params.label_byline }}{{ else }}Author{{ end }}: {{ . }}
 {{ end }}
 ## {{ site.Params.label_llms_posts_heading | default "글 목록" }}
 {{ range where site.RegularPages "Section" "posts" }}
